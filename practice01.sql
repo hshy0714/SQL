@@ -77,5 +77,5 @@ ORDER BY UPPER(country_name) ASC;
 SELECT first_name, salary,
     replace(phone_number, '.', '-') phone_number, -- . -> - 로 치환
     hire_date
-FROM employees
+FROM employees 
 WHERE hire_date <= '03/12/31';
