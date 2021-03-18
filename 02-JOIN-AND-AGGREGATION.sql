@@ -3,48 +3,47 @@
 ----------
 
 DESC employees;
-DESC department;
+DESC departments;
 
--- �몢 �뀒�씠釉붾줈遺��꽣 紐⑤뱺 �뜲�씠�꽣瑜� 遺덈윭�삱 寃쎌슦
--- CROSS JOIN : 移대뵒�쟾 �봽濡쒕뜒�듃
--- �몢 �뀒�씠釉붿쓽 議고빀 媛��뒫�븳 紐⑤뱺 �젅肄붾뱶�쓽 �뙇
+-- 두 테이블로부터 모든 데이터를 불러올 경우
+-- CROSS JOIN : 카티전 프로덕트
+-- 두 테이블의 조합 가능한 모든 레코드의 쌍
 SELECT employees.employee_id, employees.department_id,
     departments.department_id, departments.department_name
 FROM employees, departments
 ORDER BY employees.employee_id;
 
--- �씪諛섏쟻�쑝濡쒕뒗 �씠�윴 寃곌낵瑜� �썝�븯吏� �븡�쓣 寃�
--- 泥� 踰덉㎏ �뀒�씠釉붿쓽 department_id �젙蹂댁� �몢 踰덉㎏ �뀒�씠釉붿쓽 department_id瑜� �씪移�
+-- 일반적으로는 이런 결과를 원하지 않을 것
+-- 첫 번째 테이블의 department_id 정보와 두 번째 테이블의 department_id를 일치
 SELECT employees.employee_id, employees.first_name, employees.department_id,
     departments.department_id, departments.department_name
-FROM employees, departments 
-WHERE employees.department_id = departments.department_id;  --  �몢 �뀒�씠釉붿쓽 �뿰寃� �젙蹂� 議곌굔�쓣 遺��뿬
---  INNER JOIN, Equi JOIN
+FROM employees, departments
+WHERE employees.department_id = departments.department_id; -- 두 테이블의 연결 정보 조건을 부여
+-- INNER JOIN, Equi JOIN
 
---  而щ읆紐낆쓽 紐⑦샇�꽦�쓣 �뵾�븯湲� �쐞�빐 �뀒�씠釉붾챸.而щ읆紐�
---  �뀒�씠釉붿뿉 蹂꾨챸(alias)瑜� 遺숈뿬二쇰㈃ �렪由�
-SELECT employee_id, first_name, -- 而щ읆 紐낆씠 �냼�냽�씠 紐낇솗�븯硫� �뀒�씠釉� 紐낆� 紐낆떆�븯吏� �븡�븘�룄 �맂�떎
+-- 컬럼명의 모호성을 피하기 위해 테이블명.컬럼명
+--  테이블에 별명(alias)를 붙여주면 편리
+SELECT employee_id, first_name, --  컬럼 명이 소속이 명확하면 테이블 명은 명시하지 않아도 된다
     emp.department_id,
-    dept.department_id,
+    dept.department_id, 
     department_name
-FROM employees emp, departments dept    --  蹂꾩묶�쓣 遺��뿬�븳 �뀒�씠釉붿쓽 紐⑸줉
+FROM employees emp, departments dept    -- 별칭을 부여한 테이블의 목록
 WHERE emp.department_id = dept.department_id;
 
-
 ----------
---  INNER JOIN: Simple Join
+-- INNER JOIN: Simple Join
 ----------
-SELECT *FROM employees; --  107紐�
+SELECT * FROM employees; -- 107
 
 SELECT first_name,
     emp.department_id,
     dept.department_id,
     department_name
-FROM employees emp, departments dept -- �뀒�씠釉� 蹂꾩묶
-WHERE emp.department_id = dept.department_id;   --  106
+FROM employees emp, departments dept -- 테이블 별칭
+WHERE emp.department_id = dept.department_id;  -- 106
 
---  JOIN �릺吏� �븡�� �궗�엺�� �늻援ъ씤媛�?
---  遺��꽌�뿉 諛곗냽�릺吏� �븡�� �궗�썝
+-- JOIN되지 않은 사원은 누구인가?
+-- 부서에 배속되지 않은 사원
 SELECT first_name, department_id
 FROM employees
 WHERE department_id is null;
@@ -53,41 +52,39 @@ SELECT first_name,
     department_id,
     department_name
 FROM employees JOIN departments
-                    USING (department_id);  --  JOIN�븷 而щ읆�쓣 紐낆떆
-                    
---  JOIN ON
+                USING (department_id);  -- JOIN할 컬럼을 명시
+                
+-- JOIN ON
 SELECT first_name,
     emp.department_id,
     department_name
 FROM employees emp JOIN departments dept
-                ON (emp.department_id = dept.department_id); -- ON -> JOIN 臾몄쓽 WHERE �젅
-                
---  Natural Join
---  �몢 �뀒�씠釉붿뿉 議곗씤�쓣 �븷 �닔 �엳�뒗 怨듯넻 �븘�뱶媛� �엳�쓣 寃쎌슦( 怨듯넻 �븘�뱶媛� 紐낇솗�븷 �븣)
+                ON (emp.department_id = dept.department_id); -- ON -> JOIN문의 WHERE 절
+
+-- Natural Join
+-- 두 테이블에 조인을 할 수 있는 공통 필드가 있을 경우(공통 필드가 명확할 때)
 SELECT first_name, department_id, department_name
 FROM employees NATURAL JOIN departments;
-
 
 ----------
 -- Theta JOIN
 ----------
--- �엫�쓽�쓽 議곌굔�쓣 �궗�슜�븯�릺 JOIN 議곌굔�씠 = 議곌굔�씠 �븘�땶 寃쎌슦�쓽 議곗씤
+-- 임의의 조건을 사용하되 JOIN 조건이 = 조건이 아닌 경우의 조인
 SELECT * FROM jobs WHERE job_id='AD_ASST';  -- min: 3000, max: 6000
 SELECT first_name, salary FROM employees emp, jobs j
 WHERE j.job_id='AD_ASST' AND
-    salary BETWEEN j.min_salary AND j.max_salary; 
-    
-    
+    salary BETWEEN j.min_salary AND j.max_salary;
+
 ----------
 -- OUTER JOIN
 ----------
 /*
-議곌굔 留뚯”�븯�뒗 吏앹씠 �뾾�뒗 �뒠�뵆�룄 NULL�쓣 �룷�븿�빐�꽌 異쒕젰�뿉 李몄뿬�떆�궎�뒗 JOIN
-紐⑤뱺 �젅肄붾뱶瑜� 異쒕젰�븷 �뀒�씠釉붿쓽 �쐞移섏뿉 �뵲�씪�꽌 LEFT, RIGHT, FULL OUTER JOIN�쑝濡� 援щ텇
-ORACLE�쓽 寃쎌슦, null�씠 異쒕젰�릺�뒗 議곌굔履쎌뿉 (+)
+조건 만족하는 짝이 없는 튜플도 NULL을 포함해서 출력에 참여시키는 JOIN
+모든 레코드를 출력할 테이블의 위치에 따라서 LEFT, RIGHT, FULL OUTER JOIN으로 구분
+ORACLE의 경우, null이 출력되는 조건쪽에 (+)
 */
---  INNER JOIN 李멸퀬 - 106
---  LEFT OUTER JOIN: ORACLE ver
+-- INNER JOIN 참고 - 106
+-- LEFT OUTER JOIN: ORACLE ver
 SELECT first_name,
     emp.department_id,
     dept.department_id,
@@ -95,24 +92,23 @@ SELECT first_name,
 FROM employees emp, departments dept
 WHERE emp.department_id = dept.department_id (+); -- LEFT OUTER JOIN
 
---  LEFT OUTER JOIN: ANSI SQL
+-- LEFT OUTER JOIN: ANSI SQL
 SELECT first_name,
     emp.department_id,
     dept.department_id,
     department_name
-FROM employees emp LEFT OUTER JOIN departments dept -- emp �뀒�씠釉붿쓽 紐⑤뱺 �젅肄붾뱶�뒗 異쒕젰�뿉 李몄뿬
+FROM employees emp LEFT OUTER JOIN departments dept --  emp 테이블의 모든 레코드는 출력에 참여
                     ON emp.department_id = dept.department_id;
                     
-
---  RIGHT OUTER JOIN: Oracle
+-- RIGHT OUTER JOIN: Oracle
 SELECT first_name,
     emp.department_id,
     dept.department_id,
     department_name
 FROM employees emp, departments dept
-WHERE emp.department_id (+) = dept.department_id;   --  departments �뀒�씠釉붿쓽 紐⑤뱺 寃곌낵瑜� 異쒕젰
+WHERE emp.department_id (+) = dept.department_id; -- departments 테이블의 모든 결과를 출력
 
---  RIGHT OUTER JOIN: ANSI SQL
+-- RIGHT OUTER JOIN: ANSI SQL
 SELECT first_name,
     emp.department_id,
     dept.department_id,
@@ -120,15 +116,14 @@ SELECT first_name,
 FROM employees emp RIGHT OUTER JOIN departments dept
                     ON emp.department_id = dept.department_id;
                     
-
--- FULL OUTER JOIN: �뼇履� �뀒�씠釉� 紐⑤몢 異쒕젰�뿉 李몄뿬
+-- FULL OUTER JOIN: 양쪽 테이블 모두 출력에 참여
 /*
 SELECT first_name,
     emp.department_id,
     dept.department_id,
     department_name
-FROM employees emp, department dept
-WHERE emp.department_id (+) = dept.department_id (+); -- FULL OUTER JOIN�� 遺덇�
+FROM employees emp, departments dept
+WHERE emp.department_id (+) = dept.department_id (+);  -- FULL OUTER JOIN은 불가
 */
 
 SELECT first_name,
@@ -138,10 +133,9 @@ SELECT first_name,
 FROM employees emp FULL OUTER JOIN departments dept
                     ON emp.department_id = dept.department_id;
                     
-                    
---  SELF JOIN: �옄�떊�쓽 FK媛� �옄�떊�쓽 PK瑜� 李몄“�븯�뒗 諛⑹떇�쓽 JOIN
---  �옄�떊�쓣 �몢 踰� �샇異쒗븯誘�濡� Alias �궗�슜�븷 �닔 諛뽰뿉 �뾾�뒗 JOIN
-SELECT emp.employee_id, emp.first_name, -- �궗�썝 �젙蹂�
+-- SELF JOIN: 자신의 FK가 자신의 PK를 참조하는 방식의 JOIN
+--  자신을 두 번 호출하므로 alias 사용할 수밖에 없는 JOIN
+SELECT emp.employee_id, emp.first_name, --  사원정보
     emp.manager_id,
     man.first_name
 FROM employees emp, employees man
@@ -154,67 +148,66 @@ SELECT emp.employee_id, emp.first_name,
 FROM employees emp JOIN employees man
                     ON emp.manager_id = man.employee_id;
                     
-                    
 ----------
--- Aggregation (吏묎퀎)
+-- Aggregation (집계)
 ----------
--- �뿬�윭 媛쒖쓽 媛믪쓣 吏묎퀎�븯�뿬 �븯�굹�쓽 寃곌낵 媛믪쓣 �궛異�
+-- 여러 개의 값을 집계하여 하나의 결과값을 산출
 
--- count: 媛��닔 �꽭湲� �븿�닔
--- employees �뀒�씠釉붿� 紐� 媛쒖쓽 �젅肄붾뱶瑜� 媛�吏�怨� �엳�뒗媛�?
-SELECT COUNT(*) FROM employees; -- *�뒗 �쟾泥� �젅肄붾뱶 移댁슫�듃瑜� 吏묎퀎 (�궡遺� 媛믪씠 null�씠 �엳�뼱�룄 吏묎퀎)
-SELECT COUNT(commission_pct) FROM employees;    --  �듅�젙 而щ읆�쓣 紐낆떆�븯硫� null�씤 寃껋� 吏묎퀎�뿉�꽌 �젣�쇅
-SELECT COUNT(*) FROM employees WHERE commission_pct is not null; -- �쐞�쓽 寃껉낵 媛숈� �쓽誘�
+-- count: 갯수 세기 함수
+-- employees 테이블은 몇 개의 레코드를 가지고 있는가?
+SELECT COUNT(*) FROM employees; -- *는 전체 레코드 카운트를 집계 (내부 값이 null이 있어도 집계)
+SELECT COUNT(commission_pct) FROM employees; -- 특정 컬럼을 명시하면 null인 것은 집계에서 제외
+SELECT COUNT(*) FROM employees WHERE commission_pct is not null; -- 위의 것과 같은 의미
 
---  �빀怨� �븿�닔: SUM
---  湲됱뿬�쓽 珥� �빀?
+-- 합계 함수: SUM
+-- 급여의 총 합?
 SELECT SUM(salary) FROM employees;
 
---  �룊洹� �븿�닔: AVG
---  �룊洹� 湲됱뿬 �궛�젙
+-- 평균 함수: AVG
+-- 평균 급여 산정
 SELECT AVG(salary) FROM employees;
 
---  �궗�썝�뱾�씠 諛쏅뒗 �룊洹� 而ㅻ�몄뀡 鍮꾩쑉
-SELECT AVG(commission_pct) FROM employees;  --  null �뜲�씠�꽣�뒗 吏묎퀎�뿉�꽌 諛곗젣
+-- 사원들이 받는 평균 커미션 비율
+SELECT AVG(commission_pct) FROM employees; -- null 데이터는 집계에서 배제
 SELECT AVG(nvl(commission_pct, 0)) FROM employees;
 
---  null�씠 �룷�븿�맂 吏묎퀎�뒗 null 媛믪쓣 �룷�븿�븷 寃껋씤吏� �븘�땶吏�瑜� 寃곗젙�븯怨� 吏묎퀎
+-- null이 포함된 집계는 null 값을 포함할 것인지 아닌지를 결정하고 집계
 
---  salary�쓽 理쒖넖媛�, 理쒕뙎媛�, �룊洹좉컪, 以묒븰媛�
+-- salary의 최솟값, 최댓값, 평균값, 중앙값
 SELECT MIN(salary), MAX(salary), AVG(salary), MEDIAN(salary)
 FROM employees;
 
---  �쓷�엳 踰뷀븯�뒗 �삤瑜�
---  遺��꽌�쓽 �븘�씠�뵒, 湲됱뿬�쓽 �룊洹좎쓣 異쒕젰�븯怨좎옄
-SELECT department_id, AVG(salary) FROM employees;   --  Error
+-- 흔히 범하는 오류
+-- 부서의 아이디, 급여 평균을 출력하고자
+SELECT department_id, AVG(salary) FROM employees; -- Error
 
---  留뚯빟�뿉 遺��꽌蹂� �룊洹� �뿰遊됱쓣 援ы븯�젮硫�?
---  遺��꽌蹂� Group�쓣 吏��뼱以� �뜲�씠�꽣瑜� ���긽�쑝濡� 吏묎퀎 �븿�닔 �닔�뻾
-SELECT department_id, ROUND (AVG(salary), 2)
+-- 만약에 부서별 평균 연봉을 구하려면?
+-- 부서별 Group을 지어준 데이터를 대상으로 집계 함수 수행
+SELECT department_id, ROUND(AVG(salary), 2)
 FROM employees
 GROUP BY department_id
 ORDER BY department_id;
 
---  吏묎퀎 �븿�닔瑜� �궗�슜�븳 SELECT 而щ읆 紐⑸줉�뿉�뒗
---  吏묎퀎�뿉 李몄뿬�븳 �븘�뱶, 吏묎퀎�븿�닔留� �삱 �닔 �엳�떎
+-- 집계 함수를 사용한 SELECT 컬럼 목록에는
+-- 집계에 참여한 필드, 집계함수만 올 수 있다
 
---  遺��꽌蹂� �룊洹� 湲됱뿬瑜� �궡由쇱감�닚�쑝濡� 異쒕젰
-SELECT department_id, ROUND(AVG(salary), 2) sal_avg -- 蹂꾩묶 �궗�슜
+-- 부서별 평균 급여를 내림차순으로 출력
+SELECT department_id, ROUND(AVG(salary), 2) sal_avg  -- 별칭 사용
 FROM employees
 GROUP BY department_id
 ORDER BY sal_avg DESC;
 
---  遺��꽌蹂� �룊洹� 湲됱뿬瑜� �궛異� �룊洹� 湲됱뿬媛� 2000�씠�긽�씤 遺��꽌瑜� 異쒕젰
+-- 부서별 평균 급여를 산출 평균 급여가 2000이상인 부서를 출력
 SELECT department_id, AVG(salary)
 FROM employees
-WHERE AVG(salary) >= 2000   --  �씠 �떆�젏�뿉�꽌�뒗 AVG(salary)媛� �닔�뻾�릺吏� �븡�� �긽�깭 -> �뾾�떎
+WHERE AVG(salary) >= 20000  --  이 시점에서는 AVG(salary)가 수행되지 않은 상태 -> 없다
 GROUP BY department_id;
---  Error: 吏묎퀎 �옉�뾽�씠 �씪�뼱�굹湲� �쟾�뿉 WHERE �젅�씠 �떎�뻾�릺湲� �븣臾�
+--  Error: 집계 작업이 일어나기 전에 WHERE 절이 실행되기 때문
 
 SELECT department_id, AVG(salary)
 FROM employees
-GROUP BY department_id  --   洹몃９�븨
-    HAVING AVG(salary) >= 7000  --  HAVING : Group by�뿉 議곌굔�쓣 遺��뿬�븷 �븣  �궗�슜
+GROUP BY department_id   -- 그룹핑
+    HAVING AVG(salary) >= 7000  --  HAVING :  Group by에 조건을 부여할 때 사용
 ORDER BY department_id;
 
 -- ROLLUP
@@ -243,3 +236,78 @@ SELECT department_id, job_id, SUM(salary)
 FROM employees
 GROUP BY CUBE(department_id, job_id)
 ORDER BY department_id;
+
+----------
+-- Subquery
+----------
+/* 
+하나의 SQL이 다른 SQL 질의의 일부에 포함되는 경우
+*/
+-- 단일행 서브쿼리
+--  서브쿼리의 결과과 단일행인 경우, 단일행 비교 연산자를 사용(=, >, >=, <, <=, <>)
+
+-- 'Den' 보다 급여를 많이 받는 사원의 이름과 급여는?
+-- 1. Den이 얼마나 급여를 받는지 - A
+-- 2. A보다 많은 급여를 받는 사람은?
+SELECT salary FROM employees WHERE first_name='Den';    --  11000 : 1
+SELECT first_name, salary FROM employees WHERE salary > 11000;  -- : 2
+-- 합친다
+SELECT first_name, salary FROM employees
+WHERE salary > (SELECT salary FROM employees WHERE first_name='Den');
+
+-- 연습: 
+-- 급여의 중앙값보다 많이 받는 직원
+-- 1. 급여의 중앙값?
+-- 2. 급여를 중앙값보다 많이 받는 직원
+SELECT MEDIAN(salary) FROM employees;   --  6200 : 1
+SELECT first_name, salary FROM employees WHERE salary > 6200;
+-- 쿼리 합치기
+SELECT first_name, salary FROM employees
+WHERE salary > (SELECT MEDIAN(salary) FROM employees);
+
+-- 급여를 가장 적게 받는 사람의 이름, 급여, 사원 번호를 출력하시오
+SELECT MIN(salary) FROM employees;  --  2100
+SELECT first_name, salary, employee_id
+FROM employees
+WHERE salary = 2100;
+-- 쿼리 합치기
+SELECT first_name, salary, employee_id
+FROM employees
+WHERE salary = (SELECT MIN(salary) FROM employees);
+
+-- 다중행 서브쿼리
+-- 서브쿼리 결과 레코드가 둘 이상인 경우, 단순 비교 불가능
+-- 집합 연산에 관련된 IN, ANY, ALL, EXSIST 등을 이용해야 한다
+
+-- 110번 부서의 직원이 받는 급여는?
+SELECT salary FROM employees WHERE department_id = 110; -- 레코드 갯수 2
+SELECT first_name, salary FROM employees
+WHERE salary = (SELECT salary FROM employees WHERE department_id = 110);
+-- Error: 서브쿼리의 결과 레코드는 2개 
+--  2개의 결과와 단일행 salary의 값을 비교할 수 없다
+
+-- Fix
+SELECT first_name, salary FROM employees
+WHERE salary IN (SELECT salary FROM employees WHERE department_id = 110); -- IN
+SELECT first_name, salary FROM employees
+WHERE salary = ANY (SELECT salary FROM employees WHERE department_id = 110); -- ANY
+
+-- IN, =ANY -> OR와 비슷
+
+SELECT first_name, salary FROM employees
+WHERE salary > ALL (SELECT salary FROM employees WHERE department_id = 110); -- ALL
+-- ALL: AND와 비슷
+
+SELECT first_name, salary FROM employees
+WHERE salary > ANY (SELECT salary FROM employees WHERE department_id = 110);
+-- salary > 12008 OR salary > 8300 -> 동일
+
+-- Correlated Query
+-- 포함한 쿼리(Outer Query), 포함된 쿼리(Inner Query)가 서로 연관관계를 맺는 쿼리
+SELECT first_name, salary, department_id
+FROM employees outer -- Outer
+WHERE salary > (SELECT AVG(salary) FROM employees
+                WHERE department_id = outer.department_id);
+-- 의미
+-- 사원 목록을 추출하되
+--  자신이 속한 부서의 평균 급여보다 많이 받는 직원을 추출하자는 의미
