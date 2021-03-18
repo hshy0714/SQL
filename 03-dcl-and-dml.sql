@@ -43,7 +43,7 @@ Oracle 12이후
     -   일반 계정 구분하기 위해 C## 접두어
     -   실제 데이터가 저장될 테이블 스페이스를 마련해 줘야한다 - USERS 테이블 스페이스에 공간을 마련
 */
-/* C## 없이 계정을 생성하는 방법 */
+/* C## 없이 계정을 생성하는 방법 - 팁 */
 ALTER SESSION SET "_ORACLE_SCRIPT" = true;
 CREATE USER HSH IDENTIFIED BY 1234;
 /*  사용자 데이터 저장 테이블 스페이스 부여 */
@@ -58,3 +58,27 @@ GRANT resource TO dbuser;   --  dbuser 역할에 자원 생성 권한을 부여
 
 -- ROLE을 GRANT하면 내부에 있는 개별 privilege(권한)이 모두 부여
 GRANT dbuser TO HSH;    --  HSH 사용자에게 dbuser 역할을 부여한다
+--  권한의 회수 REVOKE
+REVOKE dbuser FROM HSH; --  HSH 사용자로 부터 dbuser 역할을 회수
+
+--  계정 삭제
+DROP USER HSH CASCADE;
+
+--  현재 사용자에게 부여된 ROLE 확인
+--  사용자 계정으로 로그인
+show user;
+SELECT *FROM user_role_privs;
+
+--  CONNECT 역할에는 어떤 권한이 포함되어 있는가?
+DESC role_sys_privs;
+SELECT * FROM role_sys_privs WHERE role='CONNECT';  --  CONNECT롤이 포함하고 있는 권한
+SELECT * FROM role_sys_privs WHERE role='RESOURCE';
+
+SHOW USER;
+--  system 계정으로 진행
+--  HR 계정의 employees 테이블의 조회 권한을 C##HSH 에게 부여하고 싶다면
+GRANT SELECT ON hr.employees TO C##HSH;
+
+--  C##HSH 로 진행
+SHOW USER;
+SELECT *FROM hr.employees;  --  hr.employees 의 SELECT 권한을 부여받았으므로 테이블 조회 가능
