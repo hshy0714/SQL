@@ -322,11 +322,11 @@ GROUP BY department_id;
 
 --  1. 조건절에서 비교
 SELECT department_id, employee_id, first_name, salary
-FROM employees;
-WHERE (department)id, salary) IN (SELECT department_id, MAX(salary)
+FROM employees
+WHERE (department_id, salary) IN (SELECT department_id, MAX(salary) 
                                     FROM employees
                                     GROUP BY department_id)
-ORDER BY department_id; --  Error
+ORDER BY department_id;
 
 --  SUBQUERY: 임시테이블을 생성
 --  2. 부서별 최고 급여 테이블을 임시로 생성해서 테이블과 조인하는 방법
@@ -342,8 +342,8 @@ ORDER BY emp.department_id;
 SELECT emp.department_id, employee_id, first_name, emp.salary
 FROM employees emp
 WHERE emp.salary = (SELECT MAX(salary) FROM employees
-                    WHERE department_id = emp.department_id);
-ORDER BY department_id; --  Error
+                    WHERE department_id = emp.department_id)
+ORDER BY department_id;
 
 
 ----------
