@@ -21,12 +21,15 @@ SELECT * FROM ALL_USERS;
 
 
 --  로그인 권한 부여
+CREATE USER c##HSH IDENTIFIED BY 1234; --  로그인 할 수 없는 상태
+--  절절한 권한을 부여해야 한다
 GRANT create session TO C##HSH; --  C##HSH에게 세션 생성 (로그인) 권한을 부여
 
 /* 로그인 해서 다음의 쿼리를 수행해 봅니다.
 CREATE TABLE test(a NUMBER);    --  권한 불충분
 */
 GRANT connect, resource TO C##HSH;   --  접속과 자원 접근 롤을 C##HSH에게 부여
+--  일반 데이터 베이스 사용자로 활용 가능
 
 /*  다시 로그인 해서 다음의 쿼리를 수행해 봅니다.
 CREATE TABLE test(a NUMBER);    --  테이블 생성
@@ -76,9 +79,86 @@ SELECT * FROM role_sys_privs WHERE role='RESOURCE';
 
 SHOW USER;
 --  system 계정으로 진행
---  HR 계정의 employees 테이블의 조회 권한을 C##HSH 에게 부여하고 싶다면
-GRANT SELECT ON hr.employees TO C##HSH;
+--  HR 계정의 employees 테이블의 조회 권한을 C##HSH 에게 부여하고 싶다면(system)
+GRANT SELECT ON hr.employees TO C##HSH; --  권한의 부여
+REVOKE SELECT ON hr.employees FROM C##HSH;  --  권한의 회수
 
 --  C##HSH 로 진행
 SHOW USER;
 SELECT *FROM hr.employees;  --  hr.employees 의 SELECT 권한을 부여받았으므로 테이블 조회 가능
+
+----------
+--  DDL
+----------
+
+--  내가 가진 table 확인
+SELECT * FROM tab;
+--  테이블의 구조 확인
+DESC test;
+
+--  테이블 삭제
+DROP TABLE test;
+SELECT * FROM tab;
+--  휴지통
+PURGE RECYCLEBIN;   --  삭제된 테이블은 휴지통에 보관
+
+SELECT * FROM tab;
+
+--  CREATE TABLE 
+CREATE TABLE book ( --  컬럼 명세
+    book_id NUMBER(5), --   5자리 숫자
+    title VARCHAR2(50), --  50글자 가변문자
+    author VARCHAR2(10),    --  10글자 가변문자열
+    pub_date DATE DEFAULT SYSDATE   --  기본값은 현재시간
+);
+DESC book;
+
+--  서브쿼리를 활용한 테이블 생성
+--  hr.employees 테이블을 기반으로 일부 데이터를 추출
+--  새 테이블
+SELECT * FROM hr.employees WHERE job_id like 'IT_%';
+CREATE TABLE it_emps AS (
+    SELECT * FROM hr.employees WHERE job_id like 'IT_%'
+);
+
+SELECT * FROM it_emps;
+CREATE TABLE emp_summary AS (
+    SELECT employee_id,
+    first_name || ' ' || last_name full_name,
+    hire_date, salary
+FROM hr.employees
+);
+DESC emp_summary;
+SELECT * FROM emp_summary;
+
+--  author 테이블
+DESC book;
+CREATE TABLE author (
+    author_id NUMBER(10),
+    author_name VARCHAR2(100) NOT NULL, --   null일수 없다
+    author_desc VARCHAR2(500),
+    PRIMARY KEY (author_id) --  author_id 컬럼을 PK로
+);
+DESC author;
+
+--  book 테이블에 author 테이블 연결을 위해
+--  book 테이블의 author 컬럼을 삭제 : DROP COLUMN
+ALTER TABLE book
+DROP COLUMN author;
+DESC book;
+
+--  author 테이블 참조를 위한 author_id 컬럼을 book에 추가
+ALTER TABLE book
+ADD (author_id NUMBER(10));
+DESC book;
+
+--  book 테이블의 PK로 사용할 book_id 도 NUMBER(10)으로 변경
+ALTER TABLE book
+MODIFY (book_id NUMBER(10));
+DESC book;
+
+--  제약조건의 추가: ADD CONSTRAINT
+--  book 테이블의 book_id를 PRIMARY KEY 제약조건 부여
+ALTER TABLE book
+ADD CONSTRAINT pk_book_id PRIMARY KEY(book_id);
+DESC book;
