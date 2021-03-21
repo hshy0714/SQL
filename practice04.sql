@@ -146,4 +146,16 @@ WHERE emp.department_id = t.department_id AND
 직원 입사일이 11 번째에서 15 번째의 직원의 
 사번, 이름, 급여, 입사일을 입사일 순서로 출력하세요
 */
+--  입사일 순 정렬 쿼리
+SELECT employee_id, first_name, salary, hire_date FROM employees ORDER BY hire_date;
+SELECT rownum rn, employee_id, first_name, salary, hire_date FROM (
+    SELECT employee_id, first_name, salary, hire_date FROM employees ORDER BY hire_date
+);
+
+SELECT rn, employee_id, first_name, salary, hire_date FROM (
+    SELECT rownum rn, employee_id, first_name, salary, hire_date FROM (
+        SELECT employee_id, first_name, salary, hire_date FROM employees ORDER BY hire_date
+    )
+)
+WHERE rn BETWEEN 11 AND 15;
 
