@@ -92,3 +92,4 @@ TRUNCATE TABLE emp_123;
 --  주의 : TRUNCATE는 Transaction의 대상이 아니다 -> ROLLBACK 불가
 ROLLBACK;
 SELECT * FROM emp_123;
+--
